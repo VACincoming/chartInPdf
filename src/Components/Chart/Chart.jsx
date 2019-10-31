@@ -1,31 +1,21 @@
 import React from 'react'
-import * as csv from 'csvtojson';
+import './chart.css'
 import CanvasJSReact from '../../assets/canvasjs.react';
 import moment from 'moment'
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { PDFExport } from '@progress/kendo-react-pdf';
+import ReactFileReader from 'react-file-reader';
 var CanvasJS = CanvasJSReact.CanvasJS;
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
-
-let csvStr = 
-  `2011-02-02,5
-  2012-02-04,15
-  2013-02-03,3
-  2014-12-12,6
-  2015-02-06,4
-  2016-02-07,22
-  2017-02-08,1
-  2018-02-08,2
-`
-
 
 export default function Chart(){
   let points = null;
   let csvLines = null;
-  
+  const [isDownloadElement, setIsDownloadElement] = React.useState(false);
+  const [csvStr, setCsvStr] = React.useState(null)
   function getDataPoints(csv){
     let dataPoints = csvLines = points = [];
     csvLines = csv.split(/[\r?\n|\r|\n]+/)
+    csvLines.sort();
     for (var i = 0; i < csvLines.length; i++)
         if (csvLines[i].length > 0) {
             points = csvLines[i].split(",");
@@ -38,37 +28,56 @@ export default function Chart(){
   }
   const options = {
     animationEnabled: true,
-    exportEnabled: true,
-    theme: "light2", // "light1", "dark1", "dark2"
+    theme: "light1",
     title:{
       text: "Chart"
     },
     axisY: {
       title: "Count",
       includeZero: false,
-     
     },
     axisX: {
+      includeZero: true,
       title: "Date",
       interval: 2,
     },
     data: [{
       type: "line",
       toolTipContent: "Date {x}: count {y}",
-      dataPoints: getDataPoints(csvStr)
+      dataPoints: csvStr
     }]
   }
-  const exportPdf = () => {
-    let pdf = new jsPDF('p', 'pt');
-    pdf.saveGraphicsState();
-    //console.log(pdf)
-    //pdf.save('chart.pdf')
+
+let pdfExportComponent;
+const exportPDFWithComponent = () => {
+  pdfExportComponent.save();
+  setIsDownloadElement(true);
+}
+function handleFile(files){
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    setCsvStr(getDataPoints(reader.result))
   }
-  //html2canvas(document.getElementById("capture"))
-      return(
+  reader.readAsText(files[0]);
+}
+  return(
+    <>
+    {
+      isDownloadElement ? <div id='downloadElement'></div> : null
+    }
+      <ReactFileReader handleFiles={handleFile} fileTypes={'.csv'}>
+        <button id='uploadBtn'> Upload file </button>
+      </ReactFileReader>
+      { csvStr === null ? null :
         <>
-          <CanvasJSChart id='capture' options = {options}/>
-          <button onClick={exportPdf}>Export pdf</button>
+          <div className='wrapperMain' id='wrapperMain'>
+            <button onClick={exportPDFWithComponent} id='exportBtn'>Export with PDF</button>
+            <PDFExport ref={(component) => pdfExportComponent = component} paperSize="A4" landscape={true}>
+              <CanvasJSChart options = {options} />
+            </PDFExport>
+          </div>
         </>
-      )
+      }
+    </>
+  )
 }

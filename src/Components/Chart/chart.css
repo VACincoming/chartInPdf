@@ -1,0 +1,21 @@
+.wrapperMain{
+  max-width:1000px;
+  margin: auto;
+  text-align: center;
+  width: 100%;
+  padding: 20px;
+}
+.wrapperMain button{
+  margin-bottom: 20px;
+}
+.wrapperButton{
+  max-width: 1000px;
+  width: 100%;
+  text-align: center;
+  margin: auto;
+}
+.react-file-reader-button{
+  width: 80px;
+  margin: auto;
+  margin-bottom: 10px;
+}

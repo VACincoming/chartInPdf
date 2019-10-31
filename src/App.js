@@ -5,9 +5,7 @@ import Chart from './Components/Chart'
 function App() {
   return (
     <>
-    <React.Fragment>
       <Chart />
-    </React.Fragment> 
     </>
   );
 }
